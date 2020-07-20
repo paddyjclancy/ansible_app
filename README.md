@@ -22,8 +22,8 @@ Vagrant.config ("2") do |config|
 ```
 ---
 
-- host: [APP]
-  remote_user: [SUDO]
+- host: app
+  remote_user: sudo
   become: true
   task:
   - name: ensure nginx is at the latest version
