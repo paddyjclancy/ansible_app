@@ -3,6 +3,7 @@
   gather_facts: yes
   become: true
   tasks:
+
     # Install mongodb
     - name: MongoDB - Import public key
       apt_key:
@@ -26,6 +27,9 @@
       service:
         name: mongod
         state: started
+
+    - name: MongoDB - Enable
+      shell: systemctl enable mongod
 
 
     # Copy config
