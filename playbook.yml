@@ -42,19 +42,26 @@
   - name: Installing python
     apt : pkg=python state=present
 
-  # Install nodejs (includes npm)
-  - name: Installing Node
-    shell: |
-      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+  - name: Installing nodesource apt_key
+    apt_key:
+      url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+      state: present
 
-  - name: Installing Node 2
-    apt: pkg=nodejs state=present
+  - name: Installing nodejs repo
+    apt_repository:
+      repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+      state: present
+      update_cache: yes
 
-  # Install npm
-  - name: Installing NPM
-    shell: npm install
-    args:
-      chdir: /home/ubuntu
+  - name: Installing nodejs itself
+    apt:
+      name: nodejs
+      state: present
+
+  - name: Installing npm
+    apt:
+      name: npm
+      state: present
 
   # Install pm2  
   - name: Installing PM2
@@ -67,6 +74,7 @@
     shell: forever start app.js
     args:
       chdir: /home/ubuntu/app
+    ignore_errors: yes
     
   
   # Handlers run when called via notify
