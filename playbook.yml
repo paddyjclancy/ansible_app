@@ -1,0 +1,76 @@
+# YAML FILE STARTS WITH THREE --- DASHES(---)
+---
+- hosts: web
+# Host is to define the name of your host machine, group or all servers
+# In this example we are targeting server called web
+
+  gather_facts: yes
+# Gathering facts before performing any tasks
+
+  become: true
+# Become is used to get root permission to perform any tasks that may require admin access (sudo)
+
+  vars:
+    project_path: /home/ubuntu/app/app.js
+# vars sets project variable - ie app.js
+
+  tasks:
+# Tasks are executed in order, one at a time, against all Servers matched by the host pattern
+# Every task should have a name, which is included in the output from running the playbook
+# The goal of each task is to execute a module, with very specific arguments.
+
+
+  # Copy app folder into agent node
+  - name: Copy /app into web host
+    copy:
+      src: /home/ubuntu/app
+      dest: /home/ubuntu
+
+  # Install nginx
+  - name: Installing nginx
+    apt: pkg=nginx state=present
+    notify: restart nginx
+
+  - name: Enabling nginx during boot
+    service: name=nginx  state=started enabled=yes
+
+  # Install git
+  - name: Installing Git
+    apt: name=git state=present
+
+  # Install python
+  - name: Installing python
+    apt : pkg=python state=present
+
+  # Install nodejs (includes npm)
+  - name: Installing Node
+    shell: |
+      curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+
+  - name: Installing Node 2
+    apt: pkg=nodejs state=present
+
+  # Install npm
+  - name: Installing NPM
+    shell: npm install
+    args:
+      chdir: /home/ubuntu
+
+  # Install pm2  
+  - name: Installing PM2
+    npm:
+      name: pm2
+      global: yes
+
+  # Start pm2
+  - name: Starting app
+    shell: forever start app.js
+    args:
+      chdir: /home/ubuntu/app
+    
+  
+  # Handlers run when called via notify
+  handlers:
+          - name: restart nginx
+            service: name=nginx state=restarted
+
